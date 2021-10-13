@@ -803,8 +803,8 @@ class _FastUnmarshaller:
                 c = chr(c)
             self.bufpos += 1
             return _load_dispatch[c](self)
-        except KeyError:
-            raise ValueError("bad marshal code: %c (%d)" % (c, Ord(c)))
+        except KeyError as e:
+            raise ValueError("bad marshal code: %c (%d)" % (c, ord(c)))
         except IndexError:
             raise EOFError
 
@@ -868,6 +868,12 @@ class _FastUnmarshaller:
         return float(s)
 
     dispatch[TYPE_FLOAT] = load_float
+
+    def load_binary_float(self):
+        s = _read(self, 8)
+        return float(struct.unpack("<d", s)[0])
+
+    dispatch[TYPE_BINARY_FLOAT] = load_binary_float
 
     def load_complex(self):
         n = Ord(_read1(self))
